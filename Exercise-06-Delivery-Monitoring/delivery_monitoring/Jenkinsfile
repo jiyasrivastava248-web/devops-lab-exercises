@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Starting Delivery Monitoring pipeline'
+            }
+        }
+
+        stage('Validate Files') {
+            steps {
+                sh '''
+                    test -f delivery_metrics.py
+                    test -f Dockerfile
+                    test -f prometheus.yml
+                    test -f alert_rules.yml
+                '''
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t delivery-monitoring:latest .'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Delivery Monitoring pipeline completed successfully!'
+        }
+        failure {
+            echo 'Delivery Monitoring pipeline failed. Check the logs.'
+        }
+    }
+}
